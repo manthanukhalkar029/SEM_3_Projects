@@ -1,4 +1,152 @@
-import React from 'react';import {NavLink,Outlet,useNavigate} from 'react-router-dom';import {LayoutDashboard,BriefcaseBusiness,Upload,ArrowLeftRight,ChartNoAxesCombined,Network,Settings as SettingsIcon,LogOut,Sun,Moon,Search,Bell,WalletCards} from 'lucide-react';
-const themes=['light','dark','ocean','emerald','rose'];
-const nav=[['/','Dashboard',LayoutDashboard],['/portfolio','My Portfolio',BriefcaseBusiness],['/imports','Import Statements',Upload],['/transactions','Transactions',ArrowLeftRight],['/analytics','Analytics',ChartNoAxesCombined],['/data-structures','Data Structures',Network],['/settings','Settings',SettingsIcon]];
-export default function Layout({theme,setTheme}){const navg=useNavigate();const [search,setSearch]=React.useState('');const logout=()=>{localStorage.removeItem('portfoliox_auth');navg('/login')}; const cycleTheme=()=>setTheme(themes[(themes.indexOf(theme)+1)%themes.length]);return <div className="app-shell"><aside className="sidebar"><div className="brand"><div className="brand-mark"><WalletCards size={19}/></div><span>Portfolio<span>X</span></span></div><div className="side-label">MONITOR</div><nav>{nav.map(([to,label,Icon])=><NavLink key={label} to={to} end={to==='/' } className={({isActive})=>isActive?'active':''}><Icon size={18}/><span>{label}</span></NavLink>)}</nav><div className="sidebar-bottom"><button className="profile-mini" onClick={()=>navg('/settings')}><div className="avatar">MU</div><div><strong>My Account</strong><small>Investor</small></div></button><button className="logout" onClick={logout}><LogOut size={17}/> Sign out</button></div></aside><main className="main"><header className="topbar"><div className="mobile-brand"><WalletCards size={19}/> PortfolioX</div><div className="search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search investments..."/></div><div className="top-actions"><span className="market-pill"><i/> Markets monitored</span><button className="icon-btn" aria-label="Notifications"><Bell size={18}/><b>3</b></button><button className="icon-btn" onClick={cycleTheme} title={`Change theme (${theme})`}>{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}</button></div></header><div className="content"><Outlet/></div></main></div>}
+import React from 'react';
+import {
+  NavLink,
+  Outlet,
+  useNavigate
+} from 'react-router-dom';
+import {
+  LayoutDashboard,
+  BriefcaseBusiness,
+  Upload,
+  ArrowLeftRight,
+  ChartNoAxesCombined,
+  Network,
+  Settings as SettingsIcon,
+  LogOut,
+  Sun,
+  Moon,
+  Search,
+  Bell,
+  WalletCards
+} from 'lucide-react';
+import { clearSession } from '../services/localStore';
+
+const themes = ['light', 'dark', 'ocean', 'emerald', 'rose'];
+
+const nav = [
+  ['/', 'Dashboard', LayoutDashboard],
+  ['/portfolio', 'My Portfolio', BriefcaseBusiness],
+  ['/imports', 'Import Statements', Upload],
+  ['/transactions', 'Transactions', ArrowLeftRight],
+  ['/analytics', 'Analytics', ChartNoAxesCombined],
+  ['/data-structures', 'Data Structures', Network],
+  ['/settings', 'Settings', SettingsIcon]
+];
+
+export default function Layout({ theme, setTheme, user }) {
+  const navigate = useNavigate();
+  const [search, setSearch] = React.useState('');
+
+  const logout = () => {
+    clearSession();
+    window.location.href = '/login';
+  };
+
+  const cycleTheme = () => {
+    setTheme(themes[(themes.indexOf(theme) + 1) % themes.length]);
+  };
+
+  const displayName = user?.name || 'Investor';
+  const initials = displayName
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark">
+            <WalletCards size={19} />
+          </div>
+          <span>
+            Portfolio<span>X</span>
+          </span>
+        </div>
+
+        <div className="side-label">MONITOR</div>
+
+        <nav>
+          {nav.map(([to, label, Icon]) => (
+            <NavLink
+              key={label}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                isActive ? 'active' : ''
+              }
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <button
+            className="profile-mini"
+            onClick={() => navigate('/settings')}
+          >
+            <div className="avatar">{initials}</div>
+            <div>
+              <strong>{displayName}</strong>
+              <small>{user?.email || 'Investor'}</small>
+            </div>
+          </button>
+
+          <button className="logout" onClick={logout}>
+            <LogOut size={17} /> Sign out
+          </button>
+        </div>
+      </aside>
+
+      <main className="main">
+        <header className="topbar">
+          <div className="mobile-brand">
+            <WalletCards size={19} /> PortfolioX
+          </div>
+
+          <div className="search">
+            <Search size={17} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search investments..."
+            />
+          </div>
+
+          <div className="top-actions">
+            <span className="market-pill">
+              <i /> Monitoring mode
+            </span>
+
+            <button
+              className="icon-btn"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={cycleTheme}
+              title={`Change theme (${theme})`}
+            >
+              {theme === 'light' ? (
+                <Moon size={18} />
+              ) : (
+                <Sun size={18} />
+              )}
+            </button>
+          </div>
+        </header>
+
+        <div className="content">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}
